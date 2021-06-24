@@ -86,7 +86,9 @@
                 {{ tip }}
               </span>
             </div>
-            <div v-if="isTickerExists" class="text-sm text-red-600">Такой тикер уже добавлен</div>
+            <div v-if="isTickerExists" class="text-sm text-red-600">
+              Такой тикер уже добавлен
+            </div>
           </div>
         </div>
         <button
@@ -133,14 +135,95 @@
       </section>
       <template v-if="tickers.length > 0">
         <hr class="w-full border-t border-gray-600 my-4" />
+        <button
+          @click="page--"
+          type="button"
+          class="
+            my-4
+            inline-flex
+            items-center
+            py-2
+            px-4
+            border border-transparent
+            shadow-sm
+            text-sm
+            leading-4
+            font-medium
+            rounded-full
+            text-white
+            bg-gray-600
+            hover:bg-gray-700
+            transition-colors
+            duration-300
+            focus:outline-none
+            focus:ring-2
+            focus:ring-offset-2
+            focus:ring-gray-500
+          "
+        >
+          Назад
+        </button>
+        <button
+          @click="page++"
+          type="button"
+          class="
+            my-4
+            mx-2
+            inline-flex
+            items-center
+            py-2
+            px-4
+            border border-transparent
+            shadow-sm
+            text-sm
+            leading-4
+            font-medium
+            rounded-full
+            text-white
+            bg-gray-600
+            hover:bg-gray-700
+            transition-colors
+            duration-300
+            focus:outline-none
+            focus:ring-2
+            focus:ring-offset-2
+            focus:ring-gray-500
+          "
+        >
+          Вперед
+        </button>
+        <div class="max-w-xs">
+          <label for="filter" class="block text-sm font-medium text-gray-700"
+            >Фильтр</label
+          >
+          <div class="mt-1 relative rounded-md shadow-md">
+            <input
+              v-model="filter"
+              type="text"
+              name="filter"
+              id="filter"
+              class="
+                block
+                w-full
+                pr-10
+                border-gray-300
+                text-gray-900
+                focus:outline-none focus:ring-gray-500 focus:border-gray-500
+                sm:text-sm
+                rounded-md
+              "
+            />
+          </div>
+        </div>
+        <hr class="w-full border-t border-gray-600 my-4" />
         <dl class="mt-5 grid grid-cols-1 gap-5 sm:grid-cols-3">
           <!-- v-bind:class="sel === t ? 'border-4' : ''"-->
           <div
-            v-for="t in tickers"
+            v-for="t in filteredTickers"
             v-bind:key="t.name"
             v-on:click="select(t)"
             v-bind:class="{
-              'border-4': sel === t,
+              'border-4': selectedTicker === t,
             }"
             class="
               bg-white
@@ -196,9 +279,9 @@
         </dl>
         <hr class="w-full border-t border-gray-600 my-4" />
       </template>
-      <section v-if="sel != null" class="relative">
+      <section v-if="selectedTicker != null" class="relative">
         <h3 class="text-lg leading-6 font-medium text-gray-900 my-8">
-          {{ sel.name }} - USD
+          {{ selectedTicker.name }} - USD
         </h3>
         <div class="flex items-end border-gray-600 border-b border-l h-64">
           <div
@@ -249,11 +332,46 @@ export default {
       ticker: ``,
       tickers: [],
       graph: [],
-      sel: null,
+      selectedTicker: null,
       isTickerExists: false,
       availableCoins: [],
       tips: [],
+
+      page: 1,
+      filter: "",
     };
+  },
+
+  computed: {
+    startIndex() {
+      return (this.page - 1) * 6;
+    },
+
+    endIndex() {
+      return this.page * 6 - 1;
+    },
+
+    filteredTickers() {
+      if (this.filter !== "") {
+        return this.tickers.filter((t) => t.name.includes(this.filter));
+      }
+      return this.tickers;
+    },
+  },
+
+  watch: {
+    page() {
+      this.filteredTickers = this.filteredTickers.slice(
+        this.startIndex,
+        this.endIndex
+      );
+    },
+
+    tickers() {
+      if (this.tickers.length > 6) {
+        this.page++;
+      }
+    },
   },
 
   methods: {
@@ -272,7 +390,7 @@ export default {
           t.price = data.USD;
           t.intervalID = intervalID;
 
-          if (this.sel?.name === newTicker.name) {
+          if (this.selectedTicker?.name === newTicker.name) {
             this.graph.push(data.USD);
           }
         }, 3000);
@@ -282,7 +400,7 @@ export default {
       }
     },
     select(t) {
-      this.sel = t;
+      this.selectedTicker = t;
       this.graph = [];
     },
 
