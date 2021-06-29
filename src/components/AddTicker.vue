@@ -70,6 +70,7 @@ export default {
     AddButton,
   },
 
+  emits: ["add-ticker"],
   props: {
     addedCoins: {
       type: Array,

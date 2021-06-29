@@ -74,7 +74,7 @@
         </button>
         <div class="inline-block mx-4">{{ page }}</div>
         <button
-          @click="page++"
+          @click="onForwardClick"
           type="button"
           class="
             my-4
@@ -91,7 +91,6 @@
             rounded-full
             text-white
             bg-gray-600
-            hover:bg-gray-700
             transition-colors
             duration-300
             focus:outline-none
@@ -99,6 +98,8 @@
             focus:ring-offset-2
             focus:ring-gray-500
           "
+          :disabled="forwardPageEnabled ? false : true"
+          :class="{ 'hover:bg-gray-700': forwardPageEnabled }"
         >
           Вперед
         </button>
@@ -153,6 +154,11 @@
               </dd>
             </div>
             <div class="w-full border-t border-gray-200"></div>
+            <div class="text-center">
+              <input type="checkbox" v-model="t.checked" v-on:click.stop="" />
+              <label> Checked</label>
+            </div>
+
             <button
               v-on:click.stop="handleDelete(t)"
               class="
@@ -195,6 +201,7 @@
         :tickerName="selectedTicker.name"
         :graph="graph"
       />
+      <div>Checked coins: {{ checkedCoins }}</div>
     </div>
   </div>
 </template>
@@ -216,7 +223,6 @@ export default {
 
   data() {
     return {
-      //ticker: ``,
       tickers: [],
 
       selectedTicker: null,
@@ -228,6 +234,17 @@ export default {
   },
 
   computed: {
+    forwardPageEnabled() {
+      return this.tickers.length > (this.page - 1) * 6; //because page is increased first
+    },
+
+    checkedCoins() {
+      return this.tickers
+        .filter((t) => t.checked)
+        .map((t) => t.name)
+        .join(", ");
+    },
+
     startIndex() {
       return (this.page - 1) * 6;
     },
@@ -250,14 +267,14 @@ export default {
     },
   },
 
-  watch: {
-    tickers() {
-      // if (this.tickers.length > this.page * 6) {
-      //   this.page = Math.floor(this.tickers.length / 6);
-      // }
-      //localStorage.setItem("watched-coins", JSON.stringify(this.tickers));
-    },
-  },
+  // watch: {
+  //   tickers: {
+  //     handler() {
+  //     },
+
+  //     deep: true,
+  //   },
+  // },
 
   methods: {
     subscribeForUpdates(tickerName) {
@@ -285,6 +302,9 @@ export default {
         this.subscribeForUpdates(newTicker.name);
 
         localStorage.setItem("watched-coins", JSON.stringify(this.tickers));
+        if (this.tickers.length > this.page * 6) {
+          this.page = Math.floor(this.tickers.length / 6 + 1);
+        }
       } else {
         this.isTickerExists = true;
       }
@@ -301,7 +321,11 @@ export default {
       }
       localStorage.setItem("watched-coins", JSON.stringify(this.tickers));
     },
-
+    onForwardClick() {
+      if (this.forwardPageEnabled()) {
+        this.page++;
+      }
+    },
     getAddedCoins() {
       this.tickers = JSON.parse(localStorage.getItem("watched-coins"));
       if (this.tickers) {
