@@ -1,3 +1,3 @@
 <template>
-  <h4>Простая реклама!</h4>
+  <h4><router-link to="/simpleAdvert">Простая реклама!</router-link></h4>
 </template>
