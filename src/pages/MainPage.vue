@@ -148,7 +148,13 @@
           >
             <div class="px-4 py-5 sm:p-6 text-center">
               <dt class="text-sm font-medium text-gray-500 truncate">
-                {{ t.name }}
+                <!-- <router-link v-bind:to="'/coin/'.concat(t.name)">{{
+                  t.name
+                }}</router-link> -->
+                <router-link
+                  :to="{ name: 'coinDetails', params: { name: t.name } }"
+                  >{{ t.name }}</router-link
+                >
               </dt>
               <dd class="mt-1 text-3xl font-semibold text-gray-900">
                 {{ t.price }}
