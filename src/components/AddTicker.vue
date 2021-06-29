@@ -1,5 +1,5 @@
 <template>
-  <section>
+  <section class="inline-block">
     <div class="flex">
       <div class="max-w-xs">
         <label for="wallet" class="block text-sm font-medium text-gray-700"
@@ -8,8 +8,8 @@
         <div class="mt-1 relative rounded-md shadow-md">
           <input
             v-model="ticker"
-            v-on:keydown.enter.stop="add"
-            v-on:keydown.stop="findTips"
+            v-on:keydown.enter.stop="add(ticker)"
+            v-on:keyup.stop="findTips"
             type="text"
             name="wallet"
             id="wallet"
@@ -50,10 +50,16 @@
         <div v-if="isTickerExists" class="text-sm text-red-600">
           Такой тикер уже добавлен
         </div>
+        <div v-if="isTickerAwailable" class="text-sm text-red-600">
+          Такой тикер не существует
+        </div>
       </div>
     </div>
     <add-button v-on:click="add()" />
   </section>
+  <div class="inline-block">
+    <slot name="advert" />
+  </div>
 </template>
 
 <script>
@@ -67,7 +73,7 @@ export default {
   props: {
     addedCoins: {
       type: Array,
-      required: true
+      required: true,
     },
   },
 
@@ -75,6 +81,7 @@ export default {
     return {
       ticker: ``,
       isTickerExists: false,
+      isTickerAwailable: false,
       tips: [],
       availableCoins: [],
     };
@@ -82,8 +89,12 @@ export default {
 
   methods: {
     add(newName = this.ticker) {
-      this.$emit("add-ticker", newName);
-      this.ticker = "";
+      newName = newName.toUpperCase();
+      this.isTickerAwailable = this.availableCoins.find((t) => t === newName);
+      if (this.isTickerAwailable) {
+        this.$emit("add-ticker", newName);
+        this.ticker = "";
+      }
     },
 
     findTips() {

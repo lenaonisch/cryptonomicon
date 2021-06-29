@@ -36,7 +36,12 @@
       </svg>
     </div> -->
     <div class="container">
-      <add-ticker v-on:add-ticker="add" :addedCoins="tickers"/>
+      <add-ticker v-on:add-ticker="add" :addedCoins="tickers">
+        <template v-slot:advert>
+          <simple-advert />
+          <complex-advert />
+        </template>
+      </add-ticker>
       <template v-if="tickers.length > 0">
         <hr class="w-full border-t border-gray-600 my-4" />
         <button
@@ -197,12 +202,16 @@
 <script>
 import AddTicker from "./components/AddTicker.vue";
 import Graph from "./components/Graph.vue";
+import SimpleAdvert from "./components/SimpleAdvert.vue";
+import ComplexAdvert from "./components/ComplexAdvert.vue";
 
 export default {
   name: "App",
   components: {
     AddTicker,
     Graph,
+    SimpleAdvert,
+    ComplexAdvert,
   },
 
   data() {
@@ -265,7 +274,6 @@ export default {
           this.$refs.graphComponent.graph.push(data.USD);
         }
       }, 3000);
-      
     },
 
     add(newName = this.ticker) {
