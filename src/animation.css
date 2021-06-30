@@ -1,0 +1,14 @@
+.coins-item {
+    display: inline-block;
+    margin-right: 10px;
+  }
+  .coins-enter-active, .coins-leave-active {
+    transition: all 1s;
+  }
+  .coins-enter, .coins-leave-to /* .list-leave-active до версии 2.1.8 */ {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  .coins-list-move {
+    transition: transform 1s;
+  }
