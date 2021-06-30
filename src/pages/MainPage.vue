@@ -101,7 +101,7 @@
               v-bind:key="t.name"
               v-on:click="select(t)"
               v-bind:class="{
-                'border-4': selectedTicker === t,
+                'border-4': this.selectedTicker === t, //this.$store.state.selectedTicker === t,
               }"
               class="
                 bg-white
@@ -172,8 +172,10 @@
       </template>
       <graph
         ref="graphComponent"
-        v-if="selectedTicker != null"
-        :tickerName="selectedTicker.name"
+        v-if="this.selectedTicker != null /*this.$store.state.selectedTicker*/"
+        :tickerName="
+          this.selectedTicker.name /*this.$store.state.selectedTicker*/
+        "
         :graph="graph"
       />
       <div>Checked coins: {{ checkedCoins }}</div>
@@ -186,9 +188,13 @@ import AddTicker from "../components/AddTicker.vue";
 import Graph from "../components/Graph.vue";
 import SimpleAdvert from "../components/SimpleAdvert.vue";
 import ComplexAdvert from "../components/ComplexAdvert.vue";
+import store from "../store";
+import { mapGetters } from "vuex";
 
 export default {
   name: "MainPage",
+  store: store,
+
   components: {
     AddTicker,
     Graph,
@@ -198,11 +204,7 @@ export default {
 
   data() {
     return {
-      tickers: [],
-
-      selectedTicker: null,
       isTickerExists: false,
-
       page: 1,
       filter: "",
     };
@@ -240,6 +242,12 @@ export default {
     paginatedTickers() {
       return this.filteredTickers.slice(this.startIndex, this.endIndex);
     },
+
+    //...mapGetters(["selectedTicker"]),
+    ...mapGetters({
+      selectedTicker: "selectedTicker",
+      tickers: "watchedTickers",
+    }),
   },
 
   // watch: {
@@ -276,8 +284,7 @@ export default {
       let newTicker = { name: newName, price: "-" };
       if (this.tickers.find((t) => t.name === newName) == undefined) {
         this.isTickerExists = false;
-        this.tickers.splice(this.randomIndex(), 0, newTicker);
-        //this.tickers.push(newTicker);
+        this.tickers.push(newTicker);
         this.subscribeForUpdates(newTicker.name);
 
         localStorage.setItem("watched-coins", JSON.stringify(this.tickers));
@@ -289,14 +296,15 @@ export default {
       }
     },
     select(t) {
-      this.selectedTicker = t;
+      this.$store.commit("selectTicker", t);
     },
 
     handleDelete(toRemove) {
       clearInterval(this.tickers.find((t) => t === toRemove).intervalID);
-      this.tickers = this.tickers.filter((t) => t != toRemove);
+      this.$store.commit("removeTicker", toRemove);
+      /*this.$store.state.selectedTicker*/
       if (this.selectedTicker == toRemove) {
-        this.selectedTicker = null;
+        this.$store.commit("selectTicker", null);
       }
       localStorage.setItem("watched-coins", JSON.stringify(this.tickers));
     },
@@ -306,7 +314,10 @@ export default {
       }
     },
     getAddedCoins() {
-      this.tickers = JSON.parse(localStorage.getItem("watched-coins"));
+      this.$store.commit(
+        "addTickersFromJson",
+        localStorage.getItem("watched-coins")
+      );
       if (this.tickers) {
         this.tickers.forEach((t) => this.subscribeForUpdates(t.name));
       } else {

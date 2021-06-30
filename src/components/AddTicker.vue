@@ -64,12 +64,14 @@
 
 <script>
 import AddButton from "./AddButton.vue";
+import store from "../store";
+import { mapGetters } from "vuex";
 
 export default {
   components: {
     AddButton,
   },
-
+  store,
   emits: ["add-ticker"],
   props: {
     addedCoins: {
@@ -84,8 +86,10 @@ export default {
       isTickerExists: false,
       isTickerAwailable: false,
       tips: [],
-      availableCoins: [],
     };
+  },
+  computed: {
+    ...mapGetters(["availableCoins"]),
   },
 
   methods: {
@@ -104,20 +108,10 @@ export default {
         .filter((t) => t.includes(this.ticker.toUpperCase()))
         .slice(0, 4);
     },
-
-    async fetchAwailableCoins() {
-      let response = await fetch(
-        "https://min-api.cryptocompare.com/data/blockchain/list?api_key=aa9434795b47744b609cbde1f458c1f0b1d0548c273327fd6c5b06209e6e9282"
-      );
-      const data = await response.json();
-      for (let coin in data.Data) {
-        this.availableCoins.push(coin);
-      }
-    },
   },
 
   created: async function () {
-    await this.fetchAwailableCoins();
+    store.dispatch("fetchAwailableCoins");
   },
 };
 </script>
