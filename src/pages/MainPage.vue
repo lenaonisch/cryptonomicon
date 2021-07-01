@@ -11,7 +11,7 @@
       <template v-if="tickers.length > 0">
         <hr class="w-full border-t border-gray-600 my-4" />
         <button
-          @click="page--"
+          @click="onBackwardClick"
           type="button"
           class="
             my-4
@@ -26,8 +26,6 @@
             font-medium
             rounded-full
             text-white
-            bg-gray-600
-            hover:bg-gray-700
             transition-colors
             duration-300
             focus:outline-none
@@ -35,6 +33,12 @@
             focus:ring-offset-2
             focus:ring-gray-500
           "
+          :disabled="backwardPageEnabled ? false : true"
+          :class="{
+            'hover:bg-gray-700': backwardPageEnabled,
+            'bg-gray-600': backwardPageEnabled,
+            'bg-gray-500': !backwardPageEnabled,
+          }"
         >
           Назад
         </button>
@@ -56,7 +60,6 @@
             font-medium
             rounded-full
             text-white
-            bg-gray-600
             transition-colors
             duration-300
             focus:outline-none
@@ -65,7 +68,11 @@
             focus:ring-gray-500
           "
           :disabled="forwardPageEnabled ? false : true"
-          :class="{ 'hover:bg-gray-700': forwardPageEnabled }"
+          :class="{
+            'hover:bg-gray-700': forwardPageEnabled,
+            'bg-gray-600': forwardPageEnabled,
+            'bg-gray-500': !forwardPageEnabled,
+          }"
         >
           Вперед
         </button>
@@ -215,6 +222,10 @@ export default {
       return this.tickers.length > (this.page - 1) * 6; //because page is increased first
     },
 
+    backwardPageEnabled() {
+      return this.page > 1; //because page is increased first
+    },
+
     checkedCoins() {
       return this.tickers
         .filter((t) => t.checked)
@@ -309,8 +320,13 @@ export default {
       localStorage.setItem("watched-coins", JSON.stringify(this.tickers));
     },
     onForwardClick() {
-      if (this.forwardPageEnabled()) {
+      if (this.forwardPageEnabled) {
         this.page++;
+      }
+    },
+    onBackwardClick() {
+      if (this.backwardPageEnabled) {
+        this.page--;
       }
     },
     getAddedCoins() {
